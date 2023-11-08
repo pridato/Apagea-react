@@ -1,0 +1,67 @@
+
+
+---------------------
+  STATE GLOBAL
+      -> 2 formas de crearlo:
+        - context-api (CreateContext, useContext, componente Provider)
+        - Redux-toolkit
+---------------------
+
+Consiste en crear variables que esten disponibles para todo el arbol de componentes de la apicacion. 
+Tenías que crearte variables de state en el componente raiz: App.js e irlos pasando hacia abajo componente por
+componente como si fueran propiedades (prop-drilling), y si los quieres modificar tendrias que pasar tmb las funciones 
+que modifican esos valores del state
+
+                                                  App(state global, setGlobalState <--- context-api)
+                                                        |
+                                              ----------------------
+                                              hijo  hijo (props)  hijo  hijo
+                                                        |
+                                                    ----------
+                                                    hijo2  hijo2
+
+      esto se exita definiendo state, se define las variables globales en un contexto, se pasasn usando un proveedor
+    en el componente raiz y luego en los componentes que necesites usas un hook para recuperar esos valroes (useContext)
+
+
+CREACION VARIABLES GLOBALES EN STATE CON CONTEXT-API:
+------------------------------------------------------
+
+1º paso: Te creas un contexto en el cual defines como valor inicial el valor a pasar de forma global
+
+  ej:   const ClienteLogged = createContext( { datoscliente: {}, jwt: ''} )
+
+2º paso: Definir el proveedor de este contexto a nivel del comp. generalmente en comp. raiz App:
+
+  function App(){
+
+    return(
+      <ClienteLoggedContedxt.Provider value = { ... }
+    )
+  }
+
+3º paso: exportar el contexto o bien exportar directamente el hook:
+
+    export function useClienteLoggedContext(){ <----- hook personalizado (funcion javascript que exportas y k tiene en su interior)
+      return useContext(useClienteLoggedContext)
+    }
+
+
+
+
+------> Login añades al useContext datos del login asin: 
+            let { clienteLogged, setClienteLogged} = useClienteLoggedContext()
+            setClienteLogged ( { datoscliente: _respLogin.datoscliente, jwt: _respLogin.tokensesion } ); -> simpl. envias login 
+          
+          Necesario: app -> compartes entre todos los componentes el estado de login y carrito,
+            1. let [clienteLogged, setClienteLogged] = React.useState(null);
+            2. export function useClienteLoggedContext() {
+                return useContext(ClienteLoggedContext);
+               }       
+            3. <ClienteLoggedContext.Provider value={{ clienteLogged, setClienteLogged }}>
+                <ItemsCarritoContext.Provider value={{ itemscarro, setItemsCarro }}>
+                
+                  <RouterProvider router={routerObjects} />
+                
+                </ItemsCarritoContext.Provider>
+              </ClienteLoggedContext.Provider>
